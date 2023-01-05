@@ -1,4 +1,4 @@
-using Polymake
+import Polyhedra
 
 function sumAll2(NPS)
     # This computes the Minkowski sum of an array of polytopes.
@@ -25,17 +25,13 @@ end
 
 function newtonPolytope(f, y)
     # computes the Newton polytope of the polynomial f.
-    trms = terms(f)
     varfinds = findall(ℓ -> ℓ ∈ variables(f), y)
     n = length(y)
-    latPts = zeros(Int64, length(trms), n + 1)
-    for i = 1:length(trms)
-        v = zeros(n)
-        v[varfinds] = transpose(exponents(trms[i]))
-        latPts[i, :] = [1 v']
+    latPts = zeros(Int64, nterms(f), n)
+    for trm in terms(f)
+        latPts[i, varfinds] = exponents(trm)
     end
-    P = @pm polytope.Polytope(POINTS = latPts)
-    return P
+    return Polyhedra.polyhedron(Polyhedra.vrep(latPts))
 end
 
 function getLatticePoints(P)
@@ -50,7 +46,8 @@ end
 function vertexRepresentation(P)
     # Computes a matrix whose rows are the vertices of a lattice polytope P
     vtxmtx = P.VERTICES
-    vtxmtx = convert(Array{Int64}, vtxmtx)
+    display(P.VERTICES)
+    vtxmtx = convert(Array{Int64}, Polyhedra.vrep())
     vtxmtx = vtxmtx[:, 2:end]
     return vtxmtx
 end
